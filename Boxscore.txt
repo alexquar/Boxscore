@@ -1,0 +1,21 @@
+What is it? 
+Boxscore will be the ultimate social media site for tracking your sports journey. Users will be able to log their watches similar to how users would log movie reviews on a site like letterboxd. User can have a top 4 or something like this, show their favorite team, sports they're interested in, 
+
+
+
+Schemas
+
+User
+ id
+username
+email
+password_hash
+created_at
+avatar_url 
+bio
+location (city / timezone)
+DOB
+favorite leagues  max 4
+favorite teams max 4
+favorite games max 4
+followers 
