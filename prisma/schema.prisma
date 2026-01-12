@@ -12,3 +12,53 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// to be used for supabase auth
+model User {
+  id        String   @id @db.Uuid
+  email     String?  @unique
+  displayName      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+  journals  Journal[]
+  logs     Log[]
+  @@index([id], name: "users_id_idx")
+  @@map("users")
+  lists List[]
+}
+
+model Journal{
+  id        String   @id @db.Uuid
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+  user     User     @relation(fields: [userId], references: [id])
+  userId   String   @db.Uuid
+  @@map("journals")
+}
+
+model Log{
+  id        String   @id @db.Uuid
+  comments  String?
+  rating    Decimal? @db.Decimal(2,1)
+  createdAt DateTime @default(now())
+  user     User     @relation(fields: [userId], references: [id])
+  userId   String   @db.Uuid
+  gameId    String
+  @@index([userId], name: "logs_user_id_idx")
+  @@map("logs")
+}
+
+model List{
+  id        String   @id @db.Uuid
+  name      String
+  description String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+  user     User     @relation(fields: [userId], references: [id])
+  userId   String   @db.Uuid
+  gameIds  String[]
+  @@map("lists")
+}
+
