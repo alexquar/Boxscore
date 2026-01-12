@@ -93,11 +93,13 @@ export default function RootLayout({
       </Button>
 
       {/* Primary action */}
-      <Button size="sm" className="flex items-center justify-center">
-        <CirclePlus className="mr-1 h-4 w-4" />
-        <span className="leading-none">
-          Log
-        </span>
+      <Button size="sm" asChild className="flex items-center justify-center">
+        <Link href="/log">
+          <CirclePlus className="mr-1 h-4 w-4" />
+          <span className="leading-none">
+            Log
+          </span>
+        </Link>
       </Button>
 
       {/* Profile (logged-in) */}
