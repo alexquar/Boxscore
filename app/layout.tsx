@@ -85,11 +85,11 @@ export default function RootLayout({
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
-      <Button  size="sm">
-        Log in
+       <Button asChild variant="outline" size="sm">
+        <Link href="/login">Log in</Link>
       </Button>
-      <Button size="sm">
-        Sign up
+      <Button size="sm" asChild>
+        <Link href="/signup">Sign up</Link>
       </Button>
 
       {/* Primary action */}
