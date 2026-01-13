@@ -19,17 +19,33 @@ type LogFromApi = {
   gameId?: string
 }
 
-interface LogPageProps {
-  params: {
+// In modern Next.js App Router, `params` is provided as a Promise
+// so it must be unwrapped with `await` before use.
+type LogPageProps = {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 async function getLog(id: string): Promise<LogFromApi> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL
-  const url = baseUrl
-    ? `${baseUrl.replace(/\/$/, "")}/logs/${id}`
-    : `/api/logs/${id}`
+  // Guard against bad or missing IDs so we never call fetch with "undefined".
+  console.log("Fetching log with ID:", id)
+  if (!id || id === "undefined") {
+    notFound()
+  }
+
+  const externalApiBase = process.env.NEXT_PUBLIC_API_BASE_URL
+
+  // When calling from a server component, `fetch` requires an absolute URL.
+  // If an external API base is configured, use that; otherwise, call our
+  // internal App Router API with the current deployment's origin.
+  const url = externalApiBase
+    ? `${externalApiBase.replace(/\/$/, "")}/logs/${id}`
+    : `${
+        process.env.VERCEL_URL
+          ? `https://${process.env.VERCEL_URL}`
+          : "http://localhost:3001"
+      }/api/logs/${id}`
 
   const res = await fetch(url, {
     // Always show the freshest version of a log
@@ -39,7 +55,7 @@ async function getLog(id: string): Promise<LogFromApi> {
   if (res.status === 404) {
     notFound()
   }
-
+  console.log("res:", res)
   if (!res.ok) {
     throw new Error("Failed to load log")
   }
@@ -48,7 +64,10 @@ async function getLog(id: string): Promise<LogFromApi> {
 }
 
 export default async function LogDetailPage({ params }: LogPageProps) {
-  const log = await getLog(params.id)
+  // `params` is a Promise – unwrap it before accessing `id`.
+  const { id } = await params
+
+  const log = await getLog(id)
 
   const createdAt = log.createdAt ? new Date(log.createdAt) : null
 
@@ -159,4 +178,3 @@ export default async function LogDetailPage({ params }: LogPageProps) {
     </SplitPage>
   )
 }
-
