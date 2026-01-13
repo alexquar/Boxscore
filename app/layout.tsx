@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "./AuthProvider";
 import Logo from "../public/logo.svg"
 import Image from "next/image";
 import {
@@ -26,8 +27,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// set the apps image
-
 
 export const metadata: Metadata = {
   title: "Boxscore",
@@ -44,6 +43,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+    <AuthProvider>
         <nav className="sticky top-0 z-50 w-full bg-secondary backdrop-blur">
   <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4">
 
@@ -116,6 +116,7 @@ export default function RootLayout({
 </nav>
 
         {children}
+        </AuthProvider>
       </body>
     </html>
   );

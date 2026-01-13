@@ -127,14 +127,6 @@ export default function GameLogPage() {
                   Use any scale that feels right. We&apos;ll normalize it later.
                 </p>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="standouts">Standout players (optional)</Label>
-                <Input
-                  id="standouts"
-                  placeholder="Who defined the game for you?"
-                  className="bg-background/80"
-                />
-              </div>
             </div>
 
             <div className="space-y-2">
