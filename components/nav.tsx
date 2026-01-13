@@ -33,6 +33,7 @@ export default function Nav() {
           <Link href="/members" className="hover:text-foreground">Members</Link>
           <Link href="/lists" className="hover:text-foreground">Lists</Link>
           <Link href="/journal" className="hover:text-foreground">Journal</Link>
+          <Link href="/settings" className="hover:text-foreground">Settings</Link>
     
           {/* Leagues dropdown */}
           <NavigationMenu>
@@ -63,11 +64,15 @@ export default function Nav() {
           
     
           {/* Profile (logged-in) */}
-          <Button variant="ghost" size="icon">
-            <User className="h-4 w-4" />
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/profile">
+              <User className="h-4 w-4" />
+            </Link>
           </Button>
-          <Button variant="ghost" size="icon">
-            <Search className="h-4 w-4" />
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/search">
+              <Search className="h-4 w-4" />
+            </Link>
           </Button>
                     <Button size="sm" asChild className="flex items-center justify-center">
             <Link href="/log">
