@@ -1,12 +1,31 @@
+"use client"
 import Link from "next/link"
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { SplitPage } from "@/components/split-page"
-
+import { useState } from "react"
+import { useAuth } from "../AuthProvider"
+import { useRouter } from "next/navigation"
 export default function LoginPage() {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const { signInWithPassword } = useAuth();
+  const router = useRouter();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    // Handle login logic here
+    try {
+      await signInWithPassword(email, password); 
+    }
+    catch (error) {
+      console.error("Error logging in:", error);
+      // return
+      return;
+    }
+    router.push('/');
+  }
   return (
     <SplitPage
       title={
@@ -36,7 +55,7 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -45,6 +64,8 @@ export default function LoginPage() {
                 autoComplete="email"
                 placeholder="you@example.com"
                 className="bg-background/80"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -62,6 +83,8 @@ export default function LoginPage() {
                 type="password"
                 autoComplete="current-password"
                 className="bg-background/80"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
 

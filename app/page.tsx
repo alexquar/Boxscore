@@ -1,9 +1,11 @@
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
+"use client"
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, StarHalf, Ellipsis, Plus } from "lucide-react";
+import { useAuth } from "./AuthProvider";
 export default function Home() {
+  const { user } = useAuth();
+  console.log("Current user:", user);
   return (
     // home page we will dispplay a welcome message similar to letter box and then sections with unnderlined subtitle similar to letterboxd home page, we will have games on now, poplular games, latest news, popular reviews and popular lists and top members, these should all be in a card format
     <main className="flex min-h-screen flex-col items-center justify-between p-24">

@@ -1,12 +1,32 @@
+"use client"
 import Link from "next/link"
-
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { SplitPage } from "@/components/split-page"
-
+import { useAuth } from "../AuthProvider"
+import { useRouter } from "next/navigation"
 export default function SignupPage() {
+  const { signUpWithPassword } = useAuth();
+  const [displayName, setDisplayName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const router = useRouter();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    // Handle sign-up logic here
+    try {
+      await signUpWithPassword(email, password); 
+
+    } catch (error) {
+      console.error("Error signing up:", error);
+      return
+    }
+    router.push('/login');
+  }
+
   return (
     <SplitPage
       title={
@@ -35,7 +55,7 @@ export default function SignupPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="name">Display name</Label>
               <Input
@@ -43,6 +63,8 @@ export default function SignupPage() {
                 autoComplete="name"
                 placeholder="What should we call you?"
                 className="bg-background/80"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
               />
             </div>
 
@@ -54,6 +76,8 @@ export default function SignupPage() {
                 autoComplete="email"
                 placeholder="you@example.com"
                 className="bg-background/80"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
@@ -64,6 +88,8 @@ export default function SignupPage() {
                 type="password"
                 autoComplete="new-password"
                 className="bg-background/80"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
 
