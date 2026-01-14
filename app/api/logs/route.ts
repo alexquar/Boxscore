@@ -13,17 +13,20 @@
 // }
 import { NextRequest, NextResponse } from "next/server";
 import {prisma} from "../../../lib/prisma";
+import { LogCreation } from "../../../types/log";
 export async function POST(request: NextRequest) {
     try {
-        const body = await request.json();
+        const body: LogCreation = await request.json();
         const newLog = await prisma.log.create({
-            data: {
-                comments: body.comments,
-                rating: body.rating,
-                userId: body.userId,
-                gameId: body.gameId,
-            },
-        });
+        data: {
+        comments: body.comments,
+        rating: body.rating ,
+        gameId: body.gameId,
+        user: {
+          connect: { id: body.userId },
+        },
+        }
+    });
         return NextResponse.json(newLog, { status: 201 });
     } catch (error) {
         console.error("Error creating log:", error);

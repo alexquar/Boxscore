@@ -12,12 +12,12 @@ export default function Home() {
   const { user } = useAuth()
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background via-background to-background/95">
+    <main className="min-h-screen bg-linear-to-b from-background via-background to-background/95">
       {/* Hero */}
       <section className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-12 md:flex-row md:items-center md:justify-between lg:gap-12 lg:py-16">
         <div className="space-y-6">
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">
-            Sports logging, reimagined
+            Sports commentary, reimagined
           </p>
           <div className="space-y-3">
             <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">

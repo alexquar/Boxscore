@@ -16,7 +16,7 @@ export default function SearchPage() {
   const [query, setQuery] = useState("")
 
   return (
-    <main className="min-h-[calc(100vh-5rem)] bg-gradient-to-b from-background to-background/80 px-4 py-8">
+    <main className="min-h-[calc(100vh-5rem)] bg-linear-to-b from-background to-background/80 px-4 py-8">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
         {/* Header and primary search bar */}
         <section className="space-y-4">

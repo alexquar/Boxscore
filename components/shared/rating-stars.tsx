@@ -37,8 +37,16 @@ type RatingInputProps = {
   name?: string
   /** Maximum number of stars (defaults to 5). */
   max?: number
-  /** Initial value on a 0–5 scale. */
+  /** Controlled value on a 0–max scale. */
+  value?: number
+  /** Uncontrolled initial value on a 0–max scale. */
+  defaultValue?: number
+  /** @deprecated Use defaultValue instead. */
   initialValue?: number
+  /** Called whenever the rating changes. */
+  onChange?: (value: number) => void
+  /** Optional className for the outer wrapper. */
+  className?: string
 }
 
 /**
@@ -47,22 +55,42 @@ type RatingInputProps = {
  * Renders a row of stars that update a hidden input value so it can be
  * submitted with a standard HTML form.
  */
-export function RatingInput({ name = "rating", max = 5, initialValue = 0 }: RatingInputProps) {
-  const [value, setValue] = useState(
-    Number.isFinite(initialValue) ? Math.min(Math.max(initialValue, 0), max) : 0,
+export function RatingInput({
+  name = "rating",
+  max = 5,
+  value,
+  defaultValue,
+  initialValue,
+  onChange,
+  className,
+}: RatingInputProps) {
+  const clamp = (val: number | undefined) =>
+    Number.isFinite(val) ? Math.min(Math.max(val as number, 0), max) : 0
+
+  // Support both controlled and uncontrolled usage.
+  const [internalValue, setInternalValue] = useState<number>(() =>
+    clamp(defaultValue ?? initialValue ?? 0),
   )
+
+  const isControlled = value !== undefined
+  const currentValue = isControlled ? clamp(value) : internalValue
 
   const handleSelect = (index: number) => {
     const next = index + 1
-    setValue(next)
+
+    if (!isControlled) {
+      setInternalValue(next)
+    }
+
+    onChange?.(next)
   }
 
   return (
-    <div className="space-y-1">
+    <div className={cn("space-y-1", className)}>
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-1">
           {Array.from({ length: max }).map((_, index) => {
-            const isActive = index < value
+            const isActive = index < currentValue
             return (
               <button
                 key={index}
@@ -80,11 +108,10 @@ export function RatingInput({ name = "rating", max = 5, initialValue = 0 }: Rati
           })}
         </div>
         <span className="text-xs text-muted-foreground">
-          {value > 0 ? `${value} / ${max}` : "No rating yet"}
+          {currentValue > 0 ? `${currentValue} / ${max}` : ""}
         </span>
       </div>
-      {name && <input type="hidden" name={name} value={value} />}
+      {name && <input type="hidden" name={name} value={currentValue} />}
     </div>
   )
 }
-
