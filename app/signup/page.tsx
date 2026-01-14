@@ -1,11 +1,12 @@
 "use client"
 import Link from "next/link"
 import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { SplitPage } from "@/components/split-page"
+import { SurfaceCard } from "@/components/shared/surface-card"
+import { FormField } from "@/components/shared/form-field"
 import { useAuth } from "../AuthProvider"
 import { useRouter } from "next/navigation"
 export default function SignupPage() {
@@ -47,7 +48,7 @@ export default function SignupPage() {
         "Build custom lists",
       ]}
     >
-      <Card className="border-input/60 bg-card/95 shadow-lg shadow-black/30">
+      <SurfaceCard>
         <CardHeader>
           <CardTitle className="text-xl">Sign up for Boxscore</CardTitle>
           <CardDescription>
@@ -56,8 +57,7 @@ export default function SignupPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="name">Display name</Label>
+            <FormField id="name" label="Display name">
               <Input
                 id="name"
                 autoComplete="name"
@@ -66,10 +66,9 @@ export default function SignupPage() {
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
               />
-            </div>
+            </FormField>
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+            <FormField id="email" label="Email">
               <Input
                 id="email"
                 type="email"
@@ -79,10 +78,9 @@ export default function SignupPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-            </div>
+            </FormField>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+            <FormField id="password" label="Password">
               <Input
                 id="password"
                 type="password"
@@ -91,7 +89,7 @@ export default function SignupPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-            </div>
+            </FormField>
 
             <Button type="submit" className="w-full">
               Create account
@@ -108,8 +106,7 @@ export default function SignupPage() {
             </p>
           </form>
         </CardContent>
-      </Card>
+      </SurfaceCard>
     </SplitPage>
   )
 }
-

@@ -2,13 +2,14 @@ import { notFound } from "next/navigation"
 
 import { SplitPage } from "@/components/split-page"
 import {
-  Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { SurfaceCard } from "@/components/shared/surface-card"
+import { RatingStars } from "@/components/shared/rating-stars"
 
 type LogFromApi = {
   id: string
@@ -63,6 +64,16 @@ async function getLog(id: string): Promise<LogFromApi> {
   return res.json()
 }
 
+function normalizeRatingToFive(raw: LogFromApi["rating"]): number {
+  if (raw == null) return 0
+  const numeric = typeof raw === "string" ? parseFloat(raw) : raw
+  if (!Number.isFinite(numeric)) return 0
+
+  // Support both 0–5 and 0–10 inputs by normalizing to a 5-star scale.
+  const maybeTenScale = numeric > 5 ? numeric / 2 : numeric
+  return Math.min(5, Math.max(0, maybeTenScale))
+}
+
 export default async function LogDetailPage({ params }: LogPageProps) {
   // `params` is a Promise – unwrap it before accessing `id`.
   const { id } = await params
@@ -70,6 +81,7 @@ export default async function LogDetailPage({ params }: LogPageProps) {
   const log = await getLog(id)
 
   const createdAt = log.createdAt ? new Date(log.createdAt) : null
+  const ratingForStars = normalizeRatingToFive(log.rating)
 
   return (
     <SplitPage
@@ -90,7 +102,7 @@ export default async function LogDetailPage({ params }: LogPageProps) {
     >
       <div className="space-y-6">
         {/* Game details card — data to come from the external game API. */}
-        <Card className="border-input/60 bg-card/95 shadow-lg shadow-black/30">
+        <SurfaceCard>
           <CardHeader>
             <CardTitle className="text-lg">Game details</CardTitle>
             <CardDescription>
@@ -137,10 +149,10 @@ export default async function LogDetailPage({ params }: LogPageProps) {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </SurfaceCard>
 
         {/* Log details driven by our own database */}
-        <Card className="border-input/60 bg-card/95 shadow-lg shadow-black/30">
+        <SurfaceCard>
           <CardHeader>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -150,9 +162,12 @@ export default async function LogDetailPage({ params }: LogPageProps) {
                 </CardDescription>
               </div>
               {log.rating != null && (
-                <Badge variant="secondary" className="text-xs">
-                  Rating: {String(log.rating)}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <RatingStars value={ratingForStars} />
+                  <Badge variant="secondary" className="text-xs">
+                    {ratingForStars.toFixed(1)} / 5
+                  </Badge>
+                </div>
               )}
             </div>
           </CardHeader>
@@ -173,8 +188,9 @@ export default async function LogDetailPage({ params }: LogPageProps) {
               </p>
             </div>
           </CardContent>
-        </Card>
+        </SurfaceCard>
       </div>
     </SplitPage>
   )
 }
+

@@ -5,17 +5,12 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 import { SplitPage } from "@/components/split-page"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { useAuth } from "@/app/AuthProvider"
+import { SurfaceCard } from "@/components/shared/surface-card"
+import { FormField } from "@/components/shared/form-field"
 
 export default function SettingsPage() {
   const { user, loading, signOut } = useAuth()
@@ -37,7 +32,7 @@ export default function SettingsPage() {
   const content = (() => {
     if (loading) {
       return (
-        <Card className="border-input/60 bg-card/95 shadow-lg shadow-black/30">
+        <SurfaceCard>
           <CardHeader>
             <CardTitle className="text-xl">Loading settings</CardTitle>
             <CardDescription>
@@ -51,13 +46,13 @@ export default function SettingsPage() {
               <div className="h-10 rounded-md bg-muted/60" />
             </div>
           </CardContent>
-        </Card>
+        </SurfaceCard>
       )
     }
 
     if (!user) {
       return (
-        <Card className="border-input/60 bg-card/95 shadow-lg shadow-black/30">
+        <SurfaceCard>
           <CardHeader>
             <CardTitle className="text-xl">You&apos;re not signed in</CardTitle>
             <CardDescription>
@@ -74,14 +69,14 @@ export default function SettingsPage() {
               </Button>
             </div>
           </CardContent>
-        </Card>
+        </SurfaceCard>
       )
     }
 
     return (
       <div className="space-y-6">
         {/* Account settings */}
-        <Card className="border-input/60 bg-card/95 shadow-lg shadow-black/30">
+        <SurfaceCard>
           <CardHeader>
             <CardTitle className="text-xl">Account</CardTitle>
             <CardDescription>
@@ -89,8 +84,16 @@ export default function SettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+            <FormField
+              id="email"
+              label="Email"
+              hint={
+                <>
+                  Email changes and password resets will be managed from here in a
+                  future version.
+                </>
+              }
+            >
               <Input
                 id="email"
                 type="email"
@@ -98,14 +101,13 @@ export default function SettingsPage() {
                 disabled
                 className="bg-background/80"
               />
-              <p className="text-xs text-muted-foreground">
-                Email changes and password resets will be managed from here in a
-                future version.
-              </p>
-            </div>
+            </FormField>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+            <FormField
+              id="password"
+              label="Password"
+              hint="You&apos;ll be able to update your password from this section later."
+            >
               <Input
                 id="password"
                 type="password"
@@ -113,15 +115,12 @@ export default function SettingsPage() {
                 disabled
                 className="bg-background/80"
               />
-              <p className="text-xs text-muted-foreground">
-                You&apos;ll be able to update your password from this section later.
-              </p>
-            </div>
+            </FormField>
           </CardContent>
-        </Card>
+        </SurfaceCard>
 
         {/* Preferences */}
-        <Card className="border-input/60 bg-card/95 shadow-lg shadow-black/30">
+        <SurfaceCard>
           <CardHeader>
             <CardTitle className="text-xl">Preferences</CardTitle>
             <CardDescription>
@@ -154,7 +153,7 @@ export default function SettingsPage() {
               </span>
             </div>
           </CardContent>
-        </Card>
+        </SurfaceCard>
 
         {/* Danger zone / sign out */}
         <Card className="border-destructive/40 bg-card/95 shadow-lg shadow-black/30">
@@ -203,5 +202,4 @@ export default function SettingsPage() {
     </SplitPage>
   )
 }
-
 

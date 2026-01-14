@@ -3,7 +3,6 @@
 import { useState } from "react"
 
 import {
-  Card,
   CardContent,
   CardDescription,
   CardHeader,
@@ -11,6 +10,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { SurfaceCard } from "@/components/shared/surface-card"
 
 export default function SearchPage() {
   const [query, setQuery] = useState("")
@@ -31,7 +31,7 @@ export default function SearchPage() {
             </p>
           </div>
 
-          <Card className="border-input/60 bg-card/95 shadow-lg shadow-black/30">
+          <SurfaceCard>
             <CardContent className="flex flex-col gap-3 py-4 md:flex-row md:items-center">
               <Input
                 type="search"
@@ -52,13 +52,13 @@ export default function SearchPage() {
                 </Button>
               </div>
             </CardContent>
-          </Card>
+          </SurfaceCard>
         </section>
 
         {/* Main search layout: large filter column + results column */}
         <section className="grid flex-1 gap-6 md:grid-cols-[minmax(0,1.1fr)_minmax(0,2fr)] lg:grid-cols-[minmax(0,1.1fr)_minmax(0,2.2fr)]">
           {/* Filters sidebar — intentionally tall with lots of sections */}
-          <Card className="border-input/60 bg-card/95 shadow-lg shadow-black/30">
+          <SurfaceCard>
             <CardHeader>
               <CardTitle className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                 Filters
@@ -157,11 +157,11 @@ export default function SearchPage() {
                 crowding the UI.
               </p>
             </CardContent>
-          </Card>
+          </SurfaceCard>
 
           {/* Results column */}
           <div className="space-y-4">
-            <Card className="border-input/60 bg-card/95 shadow-lg shadow-black/30">
+            <SurfaceCard>
               <CardHeader>
                 <CardTitle className="text-base">Results</CardTitle>
                 <CardDescription>
@@ -169,7 +169,7 @@ export default function SearchPage() {
                   ordered by relevance and date.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+                <CardContent className="space-y-4">
                 <div className="space-y-3 text-sm text-muted-foreground">
                   <p>
                     Start by searching for a team, league, or season. You&apos;ll be
@@ -192,12 +192,11 @@ export default function SearchPage() {
                     />
                   ))}
                 </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </SurfaceCard>
           </div>
         </section>
       </div>
     </main>
   )
 }
-

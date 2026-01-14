@@ -3,17 +3,12 @@
 import Link from "next/link"
 
 import { SplitPage } from "@/components/split-page"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { useAuth } from "@/app/AuthProvider"
+import { SurfaceCard } from "@/components/shared/surface-card"
+import { FormField } from "@/components/shared/form-field"
 
 export default function ProfilePage() {
   const { user, loading } = useAuth()
@@ -21,7 +16,7 @@ export default function ProfilePage() {
   const content = (() => {
     if (loading) {
       return (
-        <Card className="border-input/60 bg-card/95 shadow-lg shadow-black/30">
+        <SurfaceCard>
           <CardHeader>
             <CardTitle className="text-xl">Loading your profile</CardTitle>
             <CardDescription>
@@ -35,13 +30,13 @@ export default function ProfilePage() {
               <div className="h-24 rounded-md bg-muted/60" />
             </div>
           </CardContent>
-        </Card>
+        </SurfaceCard>
       )
     }
 
     if (!user) {
       return (
-        <Card className="border-input/60 bg-card/95 shadow-lg shadow-black/30">
+        <SurfaceCard>
           <CardHeader>
             <CardTitle className="text-xl">You&apos;re not signed in</CardTitle>
             <CardDescription>
@@ -58,7 +53,7 @@ export default function ProfilePage() {
               </Button>
             </div>
           </CardContent>
-        </Card>
+        </SurfaceCard>
       )
     }
 
@@ -68,7 +63,7 @@ export default function ProfilePage() {
     return (
       <div className="space-y-6">
         {/* Core profile info */}
-        <Card className="border-input/60 bg-card/95 shadow-lg shadow-black/30">
+        <SurfaceCard>
           <CardHeader>
             <CardTitle className="text-xl">Profile</CardTitle>
             <CardDescription>
@@ -77,20 +72,20 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="displayName">Display name</Label>
+              <FormField
+                id="displayName"
+                label="Display name"
+                hint="Pulling from your Boxscore account. Editing coming soon."
+              >
                 <Input
                   id="displayName"
                   value={displayName}
                   disabled
                   className="bg-background/80"
                 />
-                <p className="text-xs text-muted-foreground">
-                  Pulling from your Boxscore account. Editing coming soon.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+              </FormField>
+
+              <FormField id="email" label="Email">
                 <Input
                   id="email"
                   type="email"
@@ -98,26 +93,26 @@ export default function ProfilePage() {
                   disabled
                   className="bg-background/80"
                 />
-              </div>
+              </FormField>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="bio">Bio</Label>
+            <FormField
+              id="bio"
+              label="Bio"
+              hint="Public profile fields will be editable in a future iteration."
+            >
               <textarea
                 id="bio"
                 className="flex min-h-[80px] w-full rounded-md border border-input bg-background/80 px-3 py-2 text-sm shadow-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 placeholder="Add a short bio, favourite teams, or how you watch games."
                 disabled
               />
-              <p className="text-xs text-muted-foreground">
-                Public profile fields will be editable in a future iteration.
-              </p>
-            </div>
+            </FormField>
           </CardContent>
-        </Card>
+        </SurfaceCard>
 
         {/* Activity snapshot, Letterboxd-style */}
-        <Card className="border-input/60 bg-card/95 shadow-lg shadow-black/30">
+        <SurfaceCard>
           <CardHeader>
             <CardTitle className="text-xl">Activity snapshot</CardTitle>
             <CardDescription>
@@ -155,7 +150,7 @@ export default function ProfilePage() {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </SurfaceCard>
       </div>
     )
   })()
@@ -180,5 +175,4 @@ export default function ProfilePage() {
     </SplitPage>
   )
 }
-
 

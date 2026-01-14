@@ -1,10 +1,11 @@
 "use client"
 import Link from "next/link"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { SplitPage } from "@/components/split-page"
+import { SurfaceCard } from "@/components/shared/surface-card"
+import { FormField } from "@/components/shared/form-field"
 import { useState } from "react"
 import { useAuth } from "../AuthProvider"
 import { useRouter } from "next/navigation"
@@ -47,7 +48,7 @@ export default function LoginPage() {
         "Share with friends",
       ]}
     >
-      <Card className="border-input/60 bg-card/95 shadow-lg shadow-black/30">
+      <SurfaceCard>
         <CardHeader>
           <CardTitle className="text-xl">Log in to Boxscore</CardTitle>
           <CardDescription>
@@ -56,8 +57,7 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+            <FormField id="email" label="Email">
               <Input
                 id="email"
                 type="email"
@@ -67,17 +67,20 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+            </FormField>
+
+            <FormField
+              id="password"
+              label="Password"
+              labelExtras={
                 <Link
                   href="#"
                   className="text-xs text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
                 >
                   Forgot password?
                 </Link>
-              </div>
+              }
+            >
               <Input
                 id="password"
                 type="password"
@@ -86,7 +89,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-            </div>
+            </FormField>
 
             <Button type="submit" className="w-full">
               Log in
@@ -103,7 +106,7 @@ export default function LoginPage() {
             </p>
           </form>
         </CardContent>
-      </Card>
+      </SurfaceCard>
     </SplitPage>
   )
 }

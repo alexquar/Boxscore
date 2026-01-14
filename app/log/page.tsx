@@ -1,9 +1,11 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { SplitPage } from "@/components/split-page"
+import { SurfaceCard } from "@/components/shared/surface-card"
+import { FormField } from "@/components/shared/form-field"
+import { RatingInput } from "@/components/shared/rating-stars"
 
 export default function GameLogPage() {
   return (
@@ -26,7 +28,7 @@ export default function GameLogPage() {
         "Vibes-only notes",
       ]}
     >
-      <Card className="border-input/60 bg-card/95 shadow-lg shadow-black/30">
+      <SurfaceCard>
         <CardHeader>
           <CardTitle className="text-xl">New game log</CardTitle>
           <CardDescription>
@@ -37,16 +39,14 @@ export default function GameLogPage() {
         <CardContent>
           <form className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="date">Date</Label>
+              <FormField id="date" label="Date">
                 <Input
                   id="date"
                   type="date"
                   className="bg-background/80"
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="league">League</Label>
+              </FormField>
+              <FormField id="league" label="League">
                 <select
                   id="league"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -58,39 +58,35 @@ export default function GameLogPage() {
                   <option value="MLB">MLB</option>
                   <option value="Other">Other</option>
                 </select>
-              </div>
+              </FormField>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="homeTeam">Home team</Label>
+              <FormField id="homeTeam" label="Home team">
                 <Input
                   id="homeTeam"
                   placeholder="Home team name"
                   className="bg-background/80"
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="awayTeam">Away team</Label>
+              </FormField>
+              <FormField id="awayTeam" label="Away team">
                 <Input
                   id="awayTeam"
                   placeholder="Away team name"
                   className="bg-background/80"
                 />
-              </div>
+              </FormField>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="venue">Venue (optional)</Label>
+              <FormField id="venue" label="Venue (optional)">
                 <Input
                   id="venue"
                   placeholder="Arena or stadium"
                   className="bg-background/80"
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="scoreHome">Final score</Label>
+              </FormField>
+              <FormField id="scoreHome" label="Final score">
                 <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
                   <Input
                     id="scoreHome"
@@ -108,43 +104,34 @@ export default function GameLogPage() {
                     placeholder="2"
                   />
                 </div>
-              </div>
+              </FormField>
             </div>
 
             <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-              <div className="space-y-2">
-                <Label htmlFor="rating">Your rating</Label>
-                <Input
-                  id="rating"
-                  type="number"
-                  min={0}
-                  max={10}
-                  step={0.5}
-                  className="bg-background/80"
-                  placeholder="8.5"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Use any scale that feels right. We&apos;ll normalize it later.
-                </p>
-              </div>
+              <FormField
+                id="rating"
+                label="Your rating"
+                hint="Tap a star to rate this game on a 5-star scale."
+              >
+                <RatingInput name="rating" />
+              </FormField>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="notes">Your notes</Label>
+            <FormField id="notes" label="Your notes">
               <Textarea
                 id="notes"
                 placeholder="How did the game feel? Key moments, atmosphere, storylines..."
                 className="bg-background/80"
                 rows={4}
               />
-            </div>
+            </FormField>
 
             <Button type="submit" className="w-full">
               Save log
             </Button>
           </form>
         </CardContent>
-      </Card>
+      </SurfaceCard>
     </SplitPage>
   )
 }

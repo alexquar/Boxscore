@@ -2,11 +2,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import {prisma} from "../../../../lib/prisma";
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-    console.log("Fetching log with ID:", params.id);
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    console.log("Fetching log w params:", params);
     try {
+        const { id } = await params;
         const log = await prisma.log.findUnique({
-            where: { id: params.id },
+            where: { id },
         });
         console.log("Fetched log:", log);
 
