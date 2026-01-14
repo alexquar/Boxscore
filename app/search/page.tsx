@@ -14,7 +14,12 @@ import { SurfaceCard } from "@/components/shared/surface-card"
 
 export default function SearchPage() {
   const [query, setQuery] = useState("")
-
+  // set date to yesterday by default
+  const [filters, setFilters] = useState({
+    sports: "NHL",
+    date: new Date(Date.now() - 86400000),
+    team: "",
+  })
   return (
     <main className="min-h-[calc(100vh-5rem)] bg-linear-to-b from-background to-background/80 px-4 py-8">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
@@ -33,14 +38,17 @@ export default function SearchPage() {
 
           <SurfaceCard>
             <CardContent className="flex flex-col gap-3 py-4 md:flex-row md:items-center">
+              {/* search bar should take up all available space on medium screens and larger */}
+              <div className="md:flex-1">
               <Input
                 type="search"
                 placeholder="Search by team, league, season, player, venue..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="bg-background/80"
+                className="bg-background/80 md:flex-1"
               />
-              <div className="flex gap-2 md:w-auto">
+              </div>
+              <div className="flex flex-col md:flex-row gap-2 md:w-auto">
                 <Button className="w-full md:w-auto">Search</Button>
                 <Button
                   type="button"

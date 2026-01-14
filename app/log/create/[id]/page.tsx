@@ -156,7 +156,7 @@ export default function GameLogPage() {
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <FormField id="venue" label="Venue (optional)">
+                  <FormField id="venue" label="Venue">
                     <p className="flex h-10 w-full items-center rounded-md border border-input bg-background/80 px-3 py-2 text-sm text-muted-foreground">
                       {gameDetails.strVenue || "N/A"}
                     </p>

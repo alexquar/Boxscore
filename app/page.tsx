@@ -4,7 +4,7 @@ import Link from "next/link"
 
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-import { Ellipsis, Plus, Star, StarHalf } from "lucide-react"
+import { Ellipsis, Plus, Star, StarHalf, Pen } from "lucide-react"
 
 import { useAuth } from "./AuthProvider"
 
@@ -51,13 +51,19 @@ export default function Home() {
                 <Star className="h-3.5 w-3.5 fill-current" />
                 <Star className="h-3.5 w-3.5 fill-current" />
                 <Star className="h-3.5 w-3.5 fill-current" />
-                <StarHalf className="h-3.5 w-3.5 fill-current" />
+                <Star className="h-3.5 w-3.5 fill-current" />                <Star className="h-3.5 w-3.5 fill-current" />
+                <Star className="h-3.5 w-3.5 fill-current" />
+
               </span>
-              <span>Track how every game felt</span>
+              <span>Track your rating of every game you watch</span>
             </span>
             <span className="inline-flex items-center gap-2 rounded-full bg-background/80 px-3 py-1">
               <Plus className="h-3.5 w-3.5" />
-              <span>Create lists of seasons, teams, or eras</span>
+              <span>Create lists of related logs</span>
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full bg-background/80 px-3 py-1">
+              <Pen className="h-3.5 w-3.5" />
+              <span>Keep a personal journal of your thoughts as you watch</span>
             </span>
           </div>
         </div>
@@ -93,15 +99,6 @@ export default function Home() {
             </div>
 
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <span className="font-medium text-foreground">Your rating</span>
-                <span className="flex items-center gap-0.5 text-yellow-400">
-                  <Star className="h-3.5 w-3.5 fill-current" />
-                  <Star className="h-3.5 w-3.5 fill-current" />
-                  <Star className="h-3.5 w-3.5 fill-current" />
-                  <StarHalf className="h-3.5 w-3.5 fill-current" />
-                </span>
-              </div>
               <Ellipsis className="h-4 w-4 text-muted-foreground" />
             </div>
           </Card>

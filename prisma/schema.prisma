@@ -15,9 +15,14 @@ datasource db {
 
 // to be used for supabase auth
 model User {
-  id        String   @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
+  id        String   @id @db.Uuid
   email     String?  @unique
   displayName      String?
+  Bio       String?
+  avatarUrl String?
+  favoriteTeam String?
+  favoritePlayer String?
+  favoriteLeague String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt @default(now())
   journals  Journal[]
@@ -51,8 +56,10 @@ model Log{
   deservedWin Int?
   finalScore String?
   standoutPlayers String[]
+  likes Int     @default(0)
   @@index([userId], name: "logs_user_id_idx")
   @@map("logs")
+  @@unique([userId, gameId])
   lists List[] @relation("ListLogs")
 }
 
