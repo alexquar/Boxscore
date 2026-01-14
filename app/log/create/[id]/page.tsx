@@ -14,6 +14,9 @@ import type { SportsEvent } from "@/types/eventTypes"
 import { useAuth } from "../../../AuthProvider"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import { Slider } from "@/components/ui/slider"
+import {LogCreation} from "@/types/log"
+import { Log } from "@/lib/generated/prisma/client"
 export default function GameLogPage() {
     const params: { id: string } = useParams();
     const { id: gameId } = params;
@@ -22,11 +25,10 @@ export default function GameLogPage() {
     const [rating, setRating] = useState<number>(0);
     const [comments, setComments] = useState<string>("");
     const [howDidYouWatch, setHowDidYouWatch] = useState<string>("");
-    const [viewingTime, setViewingTime] = useState<string>("");
-    const [deservedWin, setDeservedWin] = useState<string>("");
+    const [whenDidYouWatch, setWhenDidYouWatch] = useState<string>("");
+    const [deservedWin, setDeservedWin] = useState<number >(0);
     const [standoutPlayers, setStandoutPlayers] = useState<string[]>([""]);
     console.log("Game ID from params:", gameId);
-    //fetch game details using gameId 
     const [gameDetails, setGameDetails] = useState<SportsEvent | null>(null);
     
     useState(() => {
@@ -44,6 +46,16 @@ export default function GameLogPage() {
             return;
         }
         try {
+          const body: LogCreation = {
+                userId: user.id,
+                gameId: gameId,
+                comments: comments,
+                rating: rating,
+                howDidYouWatch: howDidYouWatch,
+                viewingTime: whenDidYouWatch,
+                deservedWin: deservedWin,
+                standoutPlayers: standoutPlayers.filter(player => player.trim() !== ""),
+            };
             const response = await fetch('/api/logs', {
                 method: 'POST',
                 headers: {
@@ -54,6 +66,10 @@ export default function GameLogPage() {
                     gameId: gameId,
                     comments: comments,
                     rating: rating,
+                    howDidYouWatch: howDidYouWatch,
+                    viewingTime: whenDidYouWatch,
+                    deservedWin: deservedWin,
+                    standoutPlayers: standoutPlayers,
                 }),
             });
             if (!response.ok) {
@@ -111,7 +127,7 @@ export default function GameLogPage() {
                   <FormField id="time" label="Time">
                     <p className="flex h-10 w-full items-center rounded-md border border-input bg-background/80 px-3 py-2 text-sm text-muted-foreground">
                       {/* change to a timestamp */}
-                      {gameDetails.strTime.slice(0,5)} UTC
+                      {gameDetails.strTime.slice(0,5)}
                     </p>
                   </FormField>
                   <FormField id="league" label="League">
@@ -195,6 +211,8 @@ export default function GameLogPage() {
                     id="viewingMethod"
                     placeholder="E.g., In person at the stadium"
                     className="bg-background/80"
+                    value={howDidYouWatch}
+                    onChange={(e) => setHowDidYouWatch(e.target.value)}
                   />
                 </FormField>
                 {/* record how when you watched the game  */}
@@ -207,19 +225,28 @@ export default function GameLogPage() {
                     id="viewingTime"
                     placeholder="E.g., Live"
                     className="bg-background/80"
+                    value={whenDidYouWatch}
+                    onChange={(e) => setWhenDidYouWatch(e.target.value)}
                   />
                 </FormField>
-                {/* record the percentage of time you think the winning team deserves to win  */}
+                {/* record the percentage of time you think the winning team deserves to win this should be a slider from 0-199 */}
                 <FormField
                   id="deservedWin" 
                   label="Deserve-to-winometer?"
                   hint="Estimate the percentage of time the winning team deserved to win."
                 >
-                  <Input
+                  <Slider
                     id="deservedWin"
-                    placeholder="E.g., 75%"
-                    className="bg-background/80"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={[deservedWin]}
+                    onValueChange={(value) => setDeservedWin(value[0])}
                   />
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {deservedWin ? deservedWin : 0}%
+                  </p>
+                  
                 </FormField>
                 {/* record standout players, this will be an array of strings that you can keep adding to */}
                 <FormField
@@ -247,6 +274,7 @@ export default function GameLogPage() {
                             type="button"
                             variant="outline"
                             size="sm"
+                            className="mb-2"
                             onClick={() => {
                               const newPlayers = standoutPlayers.filter((_, i) => i !== index);
                               setStandoutPlayers(newPlayers);

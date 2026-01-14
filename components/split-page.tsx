@@ -9,10 +9,10 @@ interface SplitPageProps {
 
 export function SplitPage({ title, description, pills, children }: SplitPageProps) {
   return (
-    <main className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-linear-to-b from-background to-background/80 px-4 py-10">
-      <div className="mx-auto grid w-full max-w-5xl gap-10 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-        {/* Left column: marketing copy */}
-        <section className="flex flex-col justify-center gap-4">
+    <main className="flex h-[calc(100vh-5rem)] items-center justify-center overflow-hidden bg-linear-to-b from-background to-background/80 px-4 py-10">
+      <div className="mx-auto grid h-full w-full max-w-5xl items-stretch gap-10 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+          {/* Left column: marketing copy */}
+        <section className="flex min-h-0 flex-col justify-center gap-4">
           <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
             {title}
           </h1>
@@ -36,9 +36,12 @@ export function SplitPage({ title, description, pills, children }: SplitPageProp
         </section>
 
         {/* Right column: page content */}
-        {children}
+        <section className="min-h-0 overflow-hidden">
+          <div className="h-full w-full overflow-y-auto">
+            {children}
+          </div>
+        </section>
       </div>
     </main>
   )
 }
-

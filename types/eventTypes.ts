@@ -60,3 +60,22 @@ export type SportsEvent = {
   strVenue: string;
   strVideo: string;
 };
+
+export type LogWithEventDetails = {
+    eventDetails: SportsEvent;
+    id: string;
+    comments: string | null;
+    rating: number | null;
+    createdAt: Date;
+    userId: string;
+    gameId: string;
+    howDidYouWatch: string | null;
+    viewingTime: string | null;
+    deservedWin: number | null;
+    finalScore: string | null;
+    standoutPlayers: string[];
+    user: {
+        id: string;
+        displayName: string;
+    };
+}

@@ -10,16 +10,8 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { SurfaceCard } from "@/components/shared/surface-card"
 import { RatingStars } from "@/components/shared/rating-stars"
-
-type LogFromApi = {
-  id: string
-  comments?: string | null
-  rating?: number | string | null
-  createdAt?: string
-  userId?: string
-  gameId?: string
-}
-
+import type { LogWithEventDetails } from "@/types/eventTypes"
+import Link from "next/link"
 // In modern Next.js App Router, `params` is provided as a Promise
 // so it must be unwrapped with `await` before use.
 type LogPageProps = {
@@ -28,7 +20,7 @@ type LogPageProps = {
   }>
 }
 
-async function getLog(id: string): Promise<LogFromApi> {
+async function getLog(id: string): Promise<LogWithEventDetails> {
   // Guard against bad or missing IDs so we never call fetch with "undefined".
   console.log("Fetching log with ID:", id)
   if (!id || id === "undefined") {
@@ -56,15 +48,16 @@ async function getLog(id: string): Promise<LogFromApi> {
   if (res.status === 404) {
     notFound()
   }
-  console.log("res:", res)
   if (!res.ok) {
     throw new Error("Failed to load log")
   }
 
-  return res.json()
+  const data: LogWithEventDetails = await res.json()
+  console.log("Fetched log data:", data)
+  return data
 }
 
-function normalizeRatingToFive(raw: LogFromApi["rating"]): number {
+function normalizeRatingToFive(raw: LogWithEventDetails["rating"]): number {
   if (raw == null) return 0
   const numeric = typeof raw === "string" ? parseFloat(raw) : raw
   if (!Number.isFinite(numeric)) return 0
@@ -87,18 +80,21 @@ export default async function LogDetailPage({ params }: LogPageProps) {
     <SplitPage
       title={
         <>
-          Game log
-          <span className="block text-primary">relive how it felt.</span>
+          {
+            log.user.displayName
+          }'s log of 
+          <span className="block  text-primary">{
+            log.eventDetails.strFilename
+          }</span>
         </>
       }
       description={
         <>
-          Review your rating and notes for this game. We&apos;ll also surface rich
-          game details alongside your log once the external data hookup is in
-          place.
+            Take a look at the details of this logged game, want to make a review yourself? 
+            <Link href={`/log/create/${log.gameId}`} className="text-primary ms-2 underline">Create your own log</Link>
         </>
       }
-      pills={["Your rating", "Personal notes", "Game context"]}
+      pills={["Rating", "Notes", "Deserve-to-winometer"]}
     >
       <div className="space-y-6">
         {/* Game details card — data to come from the external game API. */}
@@ -111,7 +107,7 @@ export default async function LogDetailPage({ params }: LogPageProps) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
               {/* Placeholder scoreboard / matchup block */}
               <div className="space-y-3 rounded-lg border border-dashed border-border/60 bg-background/40 p-4">
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -121,13 +117,17 @@ export default async function LogDetailPage({ params }: LogPageProps) {
                   )}
                 </div>
                 <div className="flex items-center justify-between text-xl font-semibold">
-                  <span className="opacity-60">Home team</span>
-                  <span className="opacity-60">Away team</span>
+                  <span className="opacity-60 ">{log.eventDetails.strHomeTeam}</span>
+                  <span className="opacity-60 ">{log.eventDetails.strAwayTeam}</span>
+                </div>
+                <div className="flex items-center justify-between text-xl font-semibold">
+                  {/* centered scores */}
+                  <span className="opacity-60 mx-auto">{log.eventDetails.intHomeScore}</span>
+                  <span className="opacity-60 mx-auto">{log.eventDetails.intAwayScore}</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Use <code>gameId</code> to fetch league, teams, final score,
-                  and advanced stats from your external provider. This card is
-                  intentionally structured to hold that information.
+                    {log.eventDetails.strDescriptionEN || "Game description not available."}
+                  
                 </p>
               </div>
 
@@ -135,19 +135,31 @@ export default async function LogDetailPage({ params }: LogPageProps) {
               <div className="space-y-3 rounded-lg border border-dashed border-border/60 bg-background/40 p-4 text-sm text-muted-foreground">
                 <div className="flex flex-col gap-1">
                   <span className="font-medium text-foreground">Game meta</span>
-                  <span>League • Season • Game type</span>
-                </div>
+                    <div className="flex flex-row lg:flex-col gap-1">
+                        <span>League:</span>
+                        <span>{log.eventDetails.strLeague || "N/A"}</span>
+                    </div>
+                    <div className="flex flex-row lg:flex-col gap-1">
+                        <span>Attendance:</span>
+                        <span>{log.eventDetails.intSpectators || "N/A"}</span>
+                    </div>
+
                 <div className="flex flex-col gap-1">
                   <span className="font-medium text-foreground">When &amp; where</span>
-                  <span>Date &amp; local time</span>
-                  <span>Venue / arena</span>
+                  <div className="flex flex-row lg:flex-col gap-1">
+                        <span>Date:</span>
+                        {/* date time w hour to normal length */}
+                        <span>{log.eventDetails.dateEvent || "N/A"} {log.eventDetails.strTime.slice(0,5) || ""}</span>
+                    </div>
+                    <div className="flex flex-row lg:flex-col gap-1">
+                        <span>Venue:</span>
+                        <span>{log.eventDetails.strVenue || "N/A"}</span>
+                    </div>
                 </div>
-                <p className="text-xs">
-                  Replace this placeholder copy with real values once the
-                  backend response includes enriched game details.
-                </p>
               </div>
             </div>
+            </div>
+        
           </CardContent>
         </SurfaceCard>
 
@@ -156,9 +168,9 @@ export default async function LogDetailPage({ params }: LogPageProps) {
           <CardHeader>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <CardTitle className="text-lg">Your log</CardTitle>
+                <CardTitle className="text-lg">Game log</CardTitle>
                 <CardDescription>
-                  How you experienced this game, captured in your own words.
+                   Users personal notes and rating for this game
                 </CardDescription>
               </div>
               {log.rating != null && (
@@ -186,7 +198,59 @@ export default async function LogDetailPage({ params }: LogPageProps) {
               <p className="whitespace-pre-wrap text-sm leading-relaxed">
                 {log.comments ? log.comments : "No notes were added for this game."}
               </p>
+              {/* show other user data, watch setting, watch time, standout players */}
+                <div className="text-sm text-muted-foreground">
+                    {log.howDidYouWatch && (
+                        <p><span className="font-medium">How did you watch:</span> {log.howDidYouWatch}</p>
+                    )}
+                    {log.viewingTime && (
+                        <p><span className="font-medium">When did you watch:</span> {log.viewingTime}</p>
+                    )}
+                    {log.standoutPlayers && log.standoutPlayers.length > 0 && (
+                        <p><span className="font-medium">Standout players:</span> {log.standoutPlayers.join(", ")}</p>
+                    )}
+                </div>
             </div>
+            {/* show deserve to winometer in pie chart */}
+            <div className="space-y-2">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Deserve-to-winometer
+                </p>
+                <div className="flex items-center gap-4">
+                    <div className="relative flex h-24 w-24 items-center justify-center">
+                        <svg className="h-24 w-24">
+                            <circle
+                                className="text-muted-foreground/20"
+                                strokeWidth="8"
+                                stroke="currentColor"
+                                fill="transparent"
+                                r="36"
+                                cx="48"
+                                cy="48"
+                            />
+                            <circle
+                                className="text-primary"
+                                strokeWidth="8"
+                                strokeDasharray={226.195} // 2 * Math.PI * 36
+                                strokeDashoffset={226.195 - (log.deservedWin ?? 0) / 100 * 226.195}
+                                strokeLinecap="round"
+                                stroke="currentColor"
+                                fill="transparent"
+                                r="36"
+                                cx="48"
+                                cy="48"
+                            />
+                        </svg>
+                        <span className="absolute text-lg font-semibold">
+                            {log.deservedWin ?? 0}%
+                        </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                    {(log.eventDetails.intHomeScore != null && log.eventDetails.intAwayScore != null) ?   (log.eventDetails.intHomeScore > log.eventDetails.intAwayScore ? log.eventDetails.strHomeTeam : log.eventDetails.strAwayTeam) : "Winning  team"} deserved to win {log.deservedWin ?? 0}% of the time.
+                    </p>
+                </div>
+            </div>
+
           </CardContent>
         </SurfaceCard>
       </div>

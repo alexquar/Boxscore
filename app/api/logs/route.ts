@@ -25,6 +25,10 @@ export async function POST(request: NextRequest) {
         user: {
           connect: { id: body.userId },
         },
+        howDidYouWatch: body.howDidYouWatch,
+        viewingTime: body.viewingTime,
+        deservedWin: body.deservedWin || null,
+        standoutPlayers: body.standoutPlayers || [],
         }
     });
         return NextResponse.json(newLog, { status: 201 });
