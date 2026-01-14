@@ -9,7 +9,7 @@ interface SplitPageProps {
 
 export function SplitPage({ title, description, pills, children }: SplitPageProps) {
   return (
-    <main className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-gradient-to-b from-background to-background/80 px-4 py-10">
+    <main className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-linear-to-b from-background to-background/80 px-4 py-10">
       <div className="mx-auto grid w-full max-w-5xl gap-10 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
         {/* Left column: marketing copy */}
         <section className="flex flex-col justify-center gap-4">

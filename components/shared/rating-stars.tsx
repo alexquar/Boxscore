@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, type MouseEvent } from "react"
 
 import { Star, StarHalf } from "lucide-react"
 
@@ -37,13 +37,13 @@ type RatingInputProps = {
   name?: string
   /** Maximum number of stars (defaults to 5). */
   max?: number
-  /** Controlled value on a 0–max scale. */
+  /** Controlled value on a 0–max scale, in 0.5 increments. */
   value?: number
-  /** Uncontrolled initial value on a 0–max scale. */
+  /** Uncontrolled initial value on a 0–max scale, in 0.5 increments. */
   defaultValue?: number
   /** @deprecated Use defaultValue instead. */
   initialValue?: number
-  /** Called whenever the rating changes. */
+  /** Called whenever the rating changes (may be a half value like 3.5). */
   onChange?: (value: number) => void
   /** Optional className for the outer wrapper. */
   className?: string
@@ -64,8 +64,12 @@ export function RatingInput({
   onChange,
   className,
 }: RatingInputProps) {
-  const clamp = (val: number | undefined) =>
-    Number.isFinite(val) ? Math.min(Math.max(val as number, 0), max) : 0
+  const clamp = (val: number | undefined) => {
+    if (!Number.isFinite(val)) return 0
+    const clamped = Math.min(Math.max(val as number, 0), max)
+    // Snap to the nearest 0.5 step so external values stay aligned
+    return Math.round(clamped * 2) / 2
+  }
 
   // Support both controlled and uncontrolled usage.
   const [internalValue, setInternalValue] = useState<number>(() =>
@@ -75,8 +79,12 @@ export function RatingInput({
   const isControlled = value !== undefined
   const currentValue = isControlled ? clamp(value) : internalValue
 
-  const handleSelect = (index: number) => {
-    const next = index + 1
+  const handleSelect = (index: number, event: MouseEvent<HTMLButtonElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect()
+    const clickX = event.clientX - rect.left
+    const isHalf = clickX < rect.width / 2
+
+    const next = index + (isHalf ? 0.5 : 1)
 
     if (!isControlled) {
       setInternalValue(next)
@@ -90,19 +98,28 @@ export function RatingInput({
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-1">
           {Array.from({ length: max }).map((_, index) => {
-            const isActive = index < currentValue
+            const starValue = index + 1
+            const isFull = currentValue >= starValue
+            const isHalf = !isFull && currentValue >= starValue - 0.5
+            const isActive = isFull || isHalf
             return (
               <button
                 key={index}
                 type="button"
-                onClick={() => handleSelect(index)}
+                onClick={(event) => handleSelect(index, event)}
                 className={cn(
                   "inline-flex h-6 w-6 items-center justify-center text-yellow-400 transition-colors",
                   isActive ? "" : "opacity-30 hover:opacity-60",
                 )}
-                aria-label={`Set rating to ${index + 1} star${index === 0 ? "" : "s"}`}
+                aria-label={`Set rating to ${starValue} star${starValue === 1 ? "" : "s"}`}
               >
-                <Star className={cn("h-5 w-5", isActive && "fill-current")} />
+                {isFull ? (
+                  <Star className="h-5 w-5 fill-current" />
+                ) : isHalf ? (
+                  <StarHalf className="h-5 w-5 fill-current" />
+                ) : (
+                  <Star className="h-5 w-5" />
+                )}
               </button>
             )
           })}

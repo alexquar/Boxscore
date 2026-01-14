@@ -13,6 +13,7 @@ import { fetchEvent } from "@/util/fetchEvent"
 import type { SportsEvent } from "@/types/eventTypes"
 import { useAuth } from "../../../AuthProvider"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 export default function GameLogPage() {
     const params: { id: string } = useParams();
     const { id: gameId } = params;
@@ -20,6 +21,10 @@ export default function GameLogPage() {
     const router = useRouter();
     const [rating, setRating] = useState<number>(0);
     const [comments, setComments] = useState<string>("");
+    const [howDidYouWatch, setHowDidYouWatch] = useState<string>("");
+    const [viewingTime, setViewingTime] = useState<string>("");
+    const [deservedWin, setDeservedWin] = useState<string>("");
+    const [standoutPlayers, setStandoutPlayers] = useState<string[]>([""]);
     console.log("Game ID from params:", gameId);
     //fetch game details using gameId 
     const [gameDetails, setGameDetails] = useState<SportsEvent | null>(null);
@@ -68,7 +73,11 @@ export default function GameLogPage() {
         <SplitPage
           title={
             <>
-              Log a game
+            {/* show an icon for the league using strLeagueBadge, should be a pretty large image, center only on small screens */}
+            {gameDetails.strLeagueBadge &&
+              <Image className="mx-auto mb-4 md:mx-0" src={gameDetails.strLeagueBadge} alt={`${gameDetails.strLeague} badge`} width={128} height={128} />
+            }
+            {gameDetails.strFilename ? `Log: ${gameDetails.strFilename}` : "Log a game"}
               <span className="block text-primary">capture every detail.</span>
             </>
           }
@@ -79,17 +88,16 @@ export default function GameLogPage() {
             </>
           }
           pills={[
-            "Final score",
-            "Standout players",
-            "Vibes-only notes",
+            "Save your thoughts",
+            "Match rating",
+            "Deserved to win?",
           ]}
         >
           <SurfaceCard>
             <CardHeader>
               <CardTitle className="text-xl">New game log</CardTitle>
               <CardDescription>
-                This form is for capturing how you experienced the game. Stats are
-                optional, vibes are not.
+                This form is for capturing how you experienced the game. Game info provided as is, record your take and rating of the game
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -109,6 +117,11 @@ export default function GameLogPage() {
                   <FormField id="league" label="League">
                     <p className="flex h-10 w-full items-center rounded-md border border-input bg-background/80 px-3 py-2 text-sm text-muted-foreground">
                       {gameDetails.strLeague}
+                    </p>
+                  </FormField>
+                  <FormField id="attendance" label="Attendance">
+                    <p className="flex h-10 w-full items-center rounded-md border border-input bg-background/80 px-3 py-2 text-sm text-muted-foreground">
+                      {gameDetails.intSpectators}
                     </p>
                   </FormField>
                 </div>
@@ -171,6 +184,85 @@ export default function GameLogPage() {
                     value={comments}
                     onChange={(e) => setComments(e.target.value)}
                   />
+                </FormField>
+                {/* record in person or on tv */}
+                <FormField
+                  id="viewingMethod"
+                  label="How did you watch?"
+                  hint="In person, on TV, or online?"
+                >
+                  <Input
+                    id="viewingMethod"
+                    placeholder="E.g., In person at the stadium"
+                    className="bg-background/80"
+                  />
+                </FormField>
+                {/* record how when you watched the game  */}
+                <FormField
+                  id="viewingTime"
+                  label="When did you watch?"
+                  hint="Live, or later on?"
+                >
+                  <Input
+                    id="viewingTime"
+                    placeholder="E.g., Live"
+                    className="bg-background/80"
+                  />
+                </FormField>
+                {/* record the percentage of time you think the winning team deserves to win  */}
+                <FormField
+                  id="deservedWin" 
+                  label="Deserve-to-winometer?"
+                  hint="Estimate the percentage of time the winning team deserved to win."
+                >
+                  <Input
+                    id="deservedWin"
+                    placeholder="E.g., 75%"
+                    className="bg-background/80"
+                  />
+                </FormField>
+                {/* record standout players, this will be an array of strings that you can keep adding to */}
+                <FormField
+                  id="standoutPlayers"
+                  label="Standout players"
+                  hint="Add the names of standout players from the game."
+                >
+                  {/* input the length of the array that you can keep extending with a way to delete plays */}
+                  {standoutPlayers.map((player, index) => (
+                    <Input
+                      key={index}
+                      id={`standoutPlayer-${index}`}
+                      placeholder={`Player ${index + 1}`}
+                      className="mb-2 bg-background/80"
+                      value={player}
+                      onChange={(e) => {
+                        const newPlayers = [...standoutPlayers];
+                        newPlayers[index] = e.target.value;
+                        setStandoutPlayers(newPlayers);
+                      }}
+                    // add a way to remove a player input
+                      suffix={
+                        standoutPlayers.length > 1 ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const newPlayers = standoutPlayers.filter((_, i) => i !== index);
+                              setStandoutPlayers(newPlayers);
+                            }}>Remove</Button>
+                        ) : null
+                      }
+                    />
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setStandoutPlayers([...standoutPlayers, ""])}
+                  >
+                    Add another player
+                  </Button>
                 </FormField>
 
                 <Button type="submit" className="w-full">

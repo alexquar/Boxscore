@@ -46,6 +46,11 @@ model Log{
   user     User     @relation(fields: [userId], references: [id])
   userId   String   @db.Uuid
   gameId    String
+  howDidYouWatch String?
+  viewingTime String?
+  deservedWin Int?
+  finalScore String?
+  standoutPlayers String[]
   @@index([userId], name: "logs_user_id_idx")
   @@map("logs")
   lists List[] @relation("ListLogs")
