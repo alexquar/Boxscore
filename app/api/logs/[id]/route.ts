@@ -39,3 +39,40 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         return NextResponse.json({ error: "Failed to fetch log" }, { status: 500 });
     }
 }
+
+
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    try {
+        const { id } = await params;
+        const body = await request.json();
+        const updatedLog = await prisma.log.update({
+            where: { id },
+            data: {
+                comments: body.comments,
+                rating: body.rating,
+                howDidYouWatch: body.howDidYouWatch,
+                viewingTime: body.viewingTime,
+                deservedWin: body.deservedWin,
+                standoutPlayers: body.standoutPlayers,
+            },
+        });
+        return NextResponse.json(updatedLog, { status: 200 });
+    }
+    catch (error) {
+        console.error("Error updating log:", error);
+        return NextResponse.json({ error: "Failed to update log" }, { status: 500 });
+    }
+}
+
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    try {
+        const { id } = await params;
+        await prisma.log.delete({
+            where: { id },
+        });
+        return NextResponse.json({ message: "Log deleted successfully" }, { status: 200 });
+    } catch (error) {
+        console.error("Error deleting log:", error);
+        return NextResponse.json({ error: "Failed to delete log" }, { status: 500 });
+    }
+}

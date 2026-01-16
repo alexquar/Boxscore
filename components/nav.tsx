@@ -10,7 +10,7 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
-import { User, CirclePlus, Search } from "lucide-react";
+import { User, CirclePlus, Search, Settings } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/app/AuthProvider";
 import { NHLTeam } from "@/util/nhlTeams";
@@ -56,9 +56,7 @@ export default function Nav() {
               <Link href="/journal" className="hover:text-foreground">
                 Journal
               </Link>
-              <Link href="/settings" className="hover:text-foreground">
-                Settings
-              </Link>
+
 
               {/* 2 tiered leagues and teams dropdown */}
               <NavigationMenu>
@@ -131,6 +129,9 @@ export default function Nav() {
                   <User className="h-4 w-4" />
                 </Link>
               </Button>
+              <Link href="/settings" className="hover:text-foreground">
+                <Settings className="inline-block h-4 w-4 mr-1" />
+              </Link>
               <Button variant="ghost" size="icon" asChild>
                 <Link href="/search">
                   <Search className="h-4 w-4" />

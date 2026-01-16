@@ -56,6 +56,34 @@ export default function ProfilePage() {
     fetchUserProfile();
   }, [id])
 
+  const handleProfileUpdate = async () => {
+    if (!profile) return;
+    try {
+
+      const response = await fetch(`/api/user/${profile.id}/profile`, {
+        method: "PUT",
+        body: JSON.stringify({
+          displayName: profile.displayName,
+          Bio: profile.Bio,
+          favoriteTeam: profile.favoriteTeam,
+          favoritePlayer: profile.favoritePlayer,
+          favoriteLeague: profile.favoriteLeague,
+          // avatarUrl: profile.avatarUrl,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update profile");
+      }
+      const updatedProfile: userProfile = await response.json();
+      console.log("Profile updated successfully");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
+  }
+
   const content = (() => {
     if (loading) {
       return (
@@ -112,7 +140,8 @@ export default function ProfilePage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+            <form>
+            <div className="grid gap-4 md:grid-cols-2 mb-4">
               <FormField
                 id="displayName"
                 label="Display name"
@@ -143,6 +172,7 @@ export default function ProfilePage() {
                 />
               </FormField>
             </div>
+            <div className="grid gap-4 md:grid-cols-1">
 
             <FormField
               id="bio"
@@ -248,7 +278,7 @@ export default function ProfilePage() {
             </FormField>
 
             {/* upload image field for setting the avatar which will be uploaded to s3 wrapper and then saved as avatarURL */}
-            <FormField
+            {/* <FormField
               id="avatar"
               label="Profile avatar"
               
@@ -265,9 +295,11 @@ export default function ProfilePage() {
                   }
                 }}
               />
-            </FormField>
-
+            </FormField> */}
             
+            <Button onClick={handleProfileUpdate}>Save changes</Button>
+              </div>
+            </form>
             {/* multi select of nhl/nfl/nba/mlb */}
           </CardContent>
         </SurfaceCard>
