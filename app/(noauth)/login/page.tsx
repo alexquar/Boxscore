@@ -7,7 +7,7 @@ import { SplitPage } from "@/components/split-page"
 import { SurfaceCard } from "@/components/shared/surface-card"
 import { FormField } from "@/components/shared/form-field"
 import { useState } from "react"
-import { useAuth } from "../AuthProvider"
+import { useAuth } from "../../AuthProvider"
 import { useRouter } from "next/navigation"
 export default function LoginPage() {
   const [email, setEmail] = useState("")

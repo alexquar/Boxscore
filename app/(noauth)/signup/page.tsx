@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { SplitPage } from "@/components/split-page"
 import { SurfaceCard } from "@/components/shared/surface-card"
 import { FormField } from "@/components/shared/form-field"
-import { useAuth } from "../AuthProvider"
+import { useAuth } from "../../AuthProvider"
 import { useRouter } from "next/navigation"
 export default function SignupPage() {
   const { signUpWithPassword } = useAuth();
