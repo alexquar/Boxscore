@@ -315,6 +315,7 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 sm:grid-cols-3">
+              <Link href={`/profile/log/${profile?.id}`} className="space-y-1">
               <div className="space-y-1">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   Logs
@@ -324,6 +325,8 @@ export default function ProfilePage() {
                   Total games you&apos;ve logged.
                 </p>
               </div>
+              </Link>
+              <Link href={`/profile/list/${profile?.id}`} className="space-y-1">
               <div className="space-y-1">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   Lists
@@ -333,6 +336,8 @@ export default function ProfilePage() {
                   Number of lists created.
                 </p>
               </div>
+              </Link>
+              <Link href={`/profile/journal/${profile?.id}`} className="space-y-1">
               <div className="space-y-1">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">
                   Journals
@@ -342,6 +347,7 @@ export default function ProfilePage() {
                  Number of journals created.
                 </p>
               </div>
+              </Link>
             </div>
           </CardContent>
         </SurfaceCard>
