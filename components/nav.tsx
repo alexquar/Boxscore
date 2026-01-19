@@ -82,7 +82,7 @@ export default function Nav() {
                             ).map(([key, label]) => (
                               <li key={key}>
                                 <Link
-                                  href={`/leagues/${key}`}
+                                  href={`/league/?league=${key}`}
                                   onMouseEnter={() => setActiveLeague(key)}
                                   className={`block rounded px-2 py-1 transition hover:text-foreground ${
                                     activeLeague === key
