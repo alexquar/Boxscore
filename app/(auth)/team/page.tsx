@@ -27,15 +27,14 @@ import {
   Users,
   Shield,
   Sparkles,
+  MapPin,
+  Building2,
+  Heart,
+  Shirt,
 } from "lucide-react"
+import type { TeamData } from "@/types/teamType"
 
-import { NBATeam } from "@/util/nbaTeams"
-import { NFLTeam } from "@/util/nflTeams"
-import { MLBTeam } from "@/util/mlbTeams"
-import { NHLTeam } from "@/util/nhlTeams"
-import type { LeagueData } from "@/types/leaguetype"
-
-function normalizeUrl(raw?: string) {
+function normalizeUrl(raw?: string | null) {
   if (!raw) return null
   const v = raw.trim()
   if (!v) return null
@@ -43,39 +42,12 @@ function normalizeUrl(raw?: string) {
   return `https://${v.replace(/^\/\//, "")}`
 }
 
-function safeYear(dateStr?: string) {
-  if (!dateStr) return null
-  const d = new Date(dateStr)
-  return Number.isFinite(d.getTime()) ? d.getFullYear() : null
-}
-
 /**
- * Converts "Toronto Maple Leafs" -> "Toronto_Maple_Leafs"
- * Keeps letters/numbers, collapses spaces/dashes to underscores, strips other punctuation.
+ * Input comes from /teams/?team=Toronto_Maple_Leafs
+ * We just need a nice display label if needed.
  */
-function toTeamQuerySlug(name: string) {
-  return name
-    .trim()
-    .replace(/&/g, "and")
-    .replace(/[’'"]/g, "")
-    .replace(/[^a-zA-Z0-9\s-]/g, "") // remove punctuation except spaces/hyphens
-    .replace(/[\s-]+/g, "_") // spaces/hyphens => underscore
-}
-
-function getTeamsForLeague(league?: string | null): string[] {
-  const key = (league || "").toLowerCase()
-  switch (key) {
-    case "nba":
-      return Object.values(NBATeam)
-    case "nfl":
-      return Object.values(NFLTeam)
-    case "mlb":
-      return Object.values(MLBTeam)
-    case "nhl":
-      return Object.values(NHLTeam)
-    default:
-      return []
-  }
+function fromQuerySlugToLabel(slug: string) {
+  return slug.replace(/_/g, " ")
 }
 
 function StatCard({
@@ -146,48 +118,61 @@ function GalleryImage({ src, alt }: { src: string; alt: string }) {
   )
 }
 
-export default function LeaguePage() {
+function hexToRgb(hex?: string) {
+  if (!hex) return null
+  const h = hex.trim().replace("#", "")
+  if (![3, 6].includes(h.length)) return null
+  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h
+  const n = parseInt(full, 16)
+  if (!Number.isFinite(n)) return null
+  const r = (n >> 16) & 255
+  const g = (n >> 8) & 255
+  const b = n & 255
+  return `${r} ${g} ${b}`
+}
+
+export default function TeamPage() {
   const searchParams = useSearchParams()
-  const league = searchParams.get("league")
-  const [leagueData, setLeagueData] = useState<LeagueData | null>(null)
+  const teamParam = searchParams.get("team") // e.g. Toronto_Maple_Leafs
+  const [teamData, setTeamData] = useState<TeamData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!league) {
-      setError("No league specified")
+    if (!teamParam) {
+      setError("No team specified")
       setLoading(false)
       return
     }
 
-    async function fetchLeagueData() {
+    async function fetchTeamData() {
       try {
         setLoading(true)
         const response = await fetch(
-          `/api/leagues/?league=${league}`,
+          `http://localhost:3000/api/teams/?team=${encodeURIComponent(teamParam ?? "")}`,
         )
 
         if (!response.ok) {
           const errorData = await response.json()
-          throw new Error(errorData.error || "Failed to fetch league data")
+          throw new Error(errorData.error || "Failed to fetch team data")
         }
 
         const data = await response.json()
-        setLeagueData(data)
+        setTeamData(data)
         setError(null)
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred")
-        setLeagueData(null)
+        setTeamData(null)
       } finally {
         setLoading(false)
       }
     }
 
-    fetchLeagueData()
-  }, [league])
+    fetchTeamData()
+  }, [teamParam])
 
   const links = useMemo(() => {
-    const d = leagueData
+    const d = teamData
     if (!d) return null
 
     const website = normalizeUrl(d.strWebsite)
@@ -201,39 +186,28 @@ export default function LeaguePage() {
       ? d.strTwitter.split("/").filter(Boolean).pop()
       : d.strTwitter?.replace(/^@/, "")
 
-    return {
-      website,
-      facebook,
-      twitter,
-      twitterHandle,
-      instagram,
-      youtube,
-      rss,
-    }
-  }, [leagueData])
+    return { website, facebook, twitter, twitterHandle, instagram, youtube, rss }
+  }, [teamData])
 
   const heroImage =
-    leagueData?.strBanner ||
-    leagueData?.strFanart1 ||
-    leagueData?.strFanart2 ||
-    leagueData?.strFanart3 ||
-    leagueData?.strFanart4 ||
-    leagueData?.strPoster ||
+    teamData?.strBanner ||
+    teamData?.strFanart1 ||
+    teamData?.strFanart2 ||
+    teamData?.strFanart3 ||
+    teamData?.strFanart4 ||
+    teamData?.strEquipment ||
     null
 
   const gallery = useMemo(() => {
-    const d = leagueData
+    const d = teamData
     if (!d) return []
-    return [d.strFanart1, d.strFanart2, d.strFanart3, d.strFanart4, d.strPoster]
+    return [d.strFanart1, d.strFanart2, d.strFanart3, d.strFanart4, d.strEquipment]
       .filter(Boolean)
       .slice(0, 5)
-  }, [leagueData])
+  }, [teamData])
 
-  const teams = useMemo(() => {
-    const list = getTeamsForLeague(league)
-    // Nice UX: keep stable alphabetical (enums usually already are, but just in case)
-    return [...list].sort((a, b) => a.localeCompare(b))
-  }, [league])
+  // Optional: use team colours as a subtle accent (works even in dark mode)
+  const accentRgb = useMemo(() => hexToRgb(teamData?.strColour1), [teamData?.strColour1])
 
   if (loading) {
     return (
@@ -269,21 +243,19 @@ export default function LeaguePage() {
     )
   }
 
-  if (error || !leagueData) {
+  if (error || !teamData) {
     return (
       <main className="min-h-screen">
         <div className="mx-auto max-w-5xl px-4 py-16">
           <Card className="border-border/60">
             <CardHeader>
-              <CardTitle>Error loading league</CardTitle>
+              <CardTitle>Error loading team</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-sm text-muted-foreground">{error}</p>
               <p className="text-xs text-muted-foreground">
-                Try: <span className="font-medium">mlb</span>,{" "}
-                <span className="font-medium">nfl</span>,{" "}
-                <span className="font-medium">nba</span>,{" "}
-                <span className="font-medium">nhl</span>
+                Example team param:{" "}
+                <code className="rounded bg-muted px-2 py-1">Toronto_Maple_Leafs</code>
               </p>
             </CardContent>
           </Card>
@@ -292,32 +264,39 @@ export default function LeaguePage() {
     )
   }
 
-  const firstEventYear = safeYear(leagueData.dateFirstEvent)
 
   return (
     <main className="min-h-screen">
       {/* HERO */}
       <section className="relative overflow-hidden border-b">
         {heroImage ? (
-          <>
-            <div className="absolute inset-0">
-              <Image src={heroImage} alt="League hero" fill className="object-cover" unoptimized />
-              <div className="absolute inset-0 bg-background/70 backdrop-blur-2xl" />
-              <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background" />
-            </div>
-          </>
+          <div className="absolute inset-0">
+            <Image src={heroImage} alt="Team hero" fill className="object-cover" unoptimized />
+            <div className="absolute inset-0 bg-background/70 backdrop-blur-2xl" />
+            <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background" />
+          </div>
         ) : (
           <div className="absolute inset-0 bg-gradient-to-b from-muted/40 via-background to-background" />
         )}
+
+        {/* Accent glow from team color */}
+        {accentRgb ? (
+          <div
+            className="pointer-events-none absolute -top-32 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full blur-3xl"
+            style={{
+              backgroundColor: `rgb(${accentRgb} / 0.18)`,
+            }}
+          />
+        ) : null}
 
         <div className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="flex items-start gap-4">
               <div className="relative h-16 w-16 overflow-hidden rounded-2xl border bg-background/60 sm:h-20 sm:w-20">
-                {leagueData.strLogo || leagueData.strBadge ? (
+                {teamData.strLogo || teamData.strBadge ? (
                   <Image
-                    src={leagueData.strLogo || leagueData.strBadge}
-                    alt="League logo"
+                    src={teamData.strLogo || teamData.strBadge || ""}
+                    alt="Team logo"
                     fill
                     className="object-contain p-2"
                     unoptimized
@@ -328,42 +307,63 @@ export default function LeaguePage() {
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <h1 className="truncate text-2xl font-semibold sm:text-3xl">
-                    {leagueData.strLeague}
+                    {teamData.strTeam}
                   </h1>
-                  <Badge variant="secondary" className="gap-1">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    {leagueData.strSport}
-                  </Badge>
+                  {teamData.strSport ? (
+                    <Badge variant="secondary" className="gap-1">
+                      <Sparkles className="h-3.5 w-3.5" />
+                      {teamData.strSport}
+                    </Badge>
+                  ) : null}
                 </div>
 
-                {leagueData.strLeagueAlternate ? (
+                {teamData.strTeamAlternate ? (
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {leagueData.strLeagueAlternate}
+                    {teamData.strTeamAlternate}
+                    {teamData.strTeamShort ? (
+                      <span className="text-muted-foreground"> · {teamData.strTeamShort}</span>
+                    ) : null}
                   </p>
+                ) : teamData.strTeamShort ? (
+                  <p className="mt-1 text-sm text-muted-foreground">{teamData.strTeamShort}</p>
                 ) : null}
 
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <Badge variant="outline" className="gap-1">
-                    <Globe className="h-3.5 w-3.5" />
-                    {leagueData.strCountry}
-                  </Badge>
-                  {leagueData.intFormedYear ? (
+                  {teamData.strLeague ? (
+                    <Badge variant="outline" className="gap-1">
+                      <Shield className="h-3.5 w-3.5" />
+                      {teamData.strLeague}
+                    </Badge>
+                  ) : null}
+
+                  {teamData.intFormedYear ? (
                     <Badge variant="outline" className="gap-1">
                       <Calendar className="h-3.5 w-3.5" />
-                      Founded {leagueData.intFormedYear}
+                      Founded {teamData.intFormedYear}
                     </Badge>
                   ) : null}
-                  {leagueData.strGender ? (
+
+                  {teamData.strCountry ? (
                     <Badge variant="outline" className="gap-1">
-                      <Users className="h-3.5 w-3.5" />
-                      {leagueData.strGender}
+                      <Globe className="h-3.5 w-3.5" />
+                      {teamData.strCountry}
                     </Badge>
                   ) : null}
+
                 </div>
               </div>
             </div>
 
             <div className="flex flex-wrap gap-2">
+              {teamData.strLeague ? (
+                <Button asChild variant="outline" className="gap-2">
+                  <Link href={`/league/?league=${encodeURIComponent(teamData.strLeague.toLowerCase())}`}>
+                    <Shield className="h-4 w-4" />
+                    League
+                  </Link>
+                </Button>
+              ) : null}
+
               {links?.website ? (
                 <Button asChild variant="secondary" className="gap-2">
                   <Link href={links.website} target="_blank" rel="noreferrer">
@@ -372,37 +372,29 @@ export default function LeaguePage() {
                   </Link>
                 </Button>
               ) : null}
-              {links?.rss ? (
-                <Button asChild variant="outline" className="gap-2">
-                  <Link href={links.rss} target="_blank" rel="noreferrer">
-                    <Rss className="h-4 w-4" />
-                    RSS
-                  </Link>
-                </Button>
-              ) : null}
             </div>
           </div>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
-              icon={<Shield className="h-4 w-4 text-muted-foreground" />}
-              label="Division"
-              value={leagueData.intDivision || "—"}
+              icon={<MapPin className="h-4 w-4 text-muted-foreground" />}
+              label="Location"
+              value={teamData.strLocation || "—"}
             />
             <StatCard
-              icon={<Calendar className="h-4 w-4 text-muted-foreground" />}
-              label="First event"
-              value={firstEventYear ?? "—"}
-            />
-            <StatCard
-              icon={<Info className="h-4 w-4 text-muted-foreground" />}
-              label="Season"
-              value={leagueData.strCurrentSeason || "—"}
+              icon={<Building2 className="h-4 w-4 text-muted-foreground" />}
+              label="Stadium"
+              value={teamData.strStadium || "—"}
             />
             <StatCard
               icon={<Users className="h-4 w-4 text-muted-foreground" />}
-              label="Gender"
-              value={leagueData.strGender || "—"}
+              label="Division"
+              value={teamData.strDivision || "—"}
+            />
+            <StatCard
+              icon={<Shirt className="h-4 w-4 text-muted-foreground" />}
+              label="Capacity"
+              value={teamData.intStadiumCapacity && !isNaN(Number(teamData.intStadiumCapacity)) && Number(teamData.intStadiumCapacity) ? Number(teamData.intStadiumCapacity) : "—"}
             />
           </div>
         </div>
@@ -424,80 +416,60 @@ export default function LeaguePage() {
                 <Tabs defaultValue="overview" className="w-full">
                   <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="broadcast">Broadcast</TabsTrigger>
+                    <TabsTrigger value="details">Details</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="overview" className="mt-4">
                     <ScrollArea className="h-[280px] pr-4">
                       <div className="space-y-4 text-sm leading-relaxed text-foreground/90">
-                        {(leagueData.strDescriptionEN || "")
+                        {(teamData.strDescriptionEN || "")
                           .split("\n\n")
                           .filter(Boolean)
                           .map((p, idx) => (
                             <p key={idx}>{p}</p>
                           ))}
-                        {!leagueData.strDescriptionEN ? (
+                        {!teamData.strDescriptionEN ? (
                           <p className="text-muted-foreground">No description available.</p>
                         ) : null}
                       </div>
                     </ScrollArea>
                   </TabsContent>
 
-                  <TabsContent value="broadcast" className="mt-4">
-                    {leagueData.strTvRights ? (
-                      <div className="rounded-xl border bg-muted/40 p-4 text-sm whitespace-pre-line">
-                        {leagueData.strTvRights}
+                  <TabsContent value="details" className="mt-4">
+                    <div className="rounded-xl border bg-muted/40 p-4 text-sm">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div>
+                          <div className="text-xs text-muted-foreground">Team</div>
+                          <div className="font-semibold">{teamData.strTeam}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-muted-foreground">League</div>
+                          <div className="font-semibold">{teamData.strLeague || "—"}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-muted-foreground">Founded</div>
+                          <div className="font-semibold">{teamData.intFormedYear || "—"}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-muted-foreground">Sport</div>
+                          <div className="font-semibold">{teamData.strSport || "—"}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-muted-foreground">Stadium</div>
+                          <div className="font-semibold">{teamData.strStadium || "—"}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-muted-foreground">Capacity</div>
+                          <div className="font-semibold">
+                            {teamData.intStadiumCapacity
+                              ? Number(teamData.intStadiumCapacity).toLocaleString()
+                              : "—"}
+                          </div>
+                        </div>
                       </div>
-                    ) : (
-                      <div className="rounded-xl border bg-muted/40 p-4 text-sm text-muted-foreground">
-                        No broadcasting rights info available.
-                      </div>
-                    )}
+                    </div>
                   </TabsContent>
                 </Tabs>
-              </CardContent>
-            </Card>
-
-            {/* TEAMS SECTION */}
-            <Card className="border-border/60">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-muted-foreground" />
-                  Teams
-                  <Badge variant="secondary" className="ml-1">
-                    {teams.length}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {teams.length ? (
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {teams.map((team) => {
-                      const slug = toTeamQuerySlug(team)
-                      return (
-                        <Link
-                          key={team}
-                          href={`/team/?team=${encodeURIComponent(slug)}`}
-                          className="group"
-                        >
-                          <div className="flex items-center justify-between rounded-xl border bg-card/50 p-3 transition hover:-translate-y-0.5 hover:border-border hover:shadow-sm">
-                            <div className="min-w-0">
-                              <div className="truncate text-sm font-semibold">{team}</div>
-                              <div className="truncate text-xs text-muted-foreground">
-                                View team page
-                              </div>
-                            </div>
-                            <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 transition group-hover:opacity-100" />
-                          </div>
-                        </Link>
-                      )
-                    })}
-                  </div>
-                ) : (
-                  <div className="rounded-xl border bg-muted/40 p-4 text-sm text-muted-foreground">
-                    No teams available for this league.
-                  </div>
-                )}
               </CardContent>
             </Card>
 
@@ -511,7 +483,7 @@ export default function LeaguePage() {
                 </CardHeader>
                 <CardContent className="grid gap-4 sm:grid-cols-2">
                   {gallery.map((src, i) => (
-                    <GalleryImage key={src + i} src={src} alt={`Fanart ${i + 1}`} />
+                    <GalleryImage key={src ?? "" + i} src={src ?? ""} alt={`Visual ${i + 1}`} />
                   ))}
                 </CardContent>
               </Card>
@@ -520,21 +492,56 @@ export default function LeaguePage() {
 
           {/* RIGHT */}
           <div className="space-y-6">
-            {leagueData.strTrophy ? (
+            {(teamData.strBadge || teamData.strLogo) ? (
               <Card className="border-border/60 overflow-hidden">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2">
                     <Trophy className="h-5 w-5 text-muted-foreground" />
-                    Trophy
+                    Identity
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {teamData.strBadge ? (
+                    <div className="relative aspect-square overflow-hidden rounded-xl border bg-muted">
+                      <Image
+                        src={teamData.strBadge}
+                        alt="badge"
+                        fill
+                        className="object-contain p-6"
+                        unoptimized
+                      />
+                    </div>
+                  ) : null}
+                  {teamData.strLogo ? (
+                    <div className="relative aspect-[16/9] overflow-hidden rounded-xl border bg-muted">
+                      <Image
+                        src={teamData.strLogo}
+                        alt="logo"
+                        fill
+                        className="object-contain p-6"
+                        unoptimized
+                      />
+                    </div>
+                  ) : null}
+                </CardContent>
+              </Card>
+            ) : null}
+
+            {teamData.strEquipment ? (
+              <Card className="border-border/60 overflow-hidden">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2">
+                    <Shirt className="h-5 w-5 text-muted-foreground" />
+                    Equipment
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="relative aspect-square overflow-hidden rounded-xl border bg-muted">
+                  <div className="relative aspect-[16/9] overflow-hidden rounded-xl border bg-muted">
                     <Image
-                      src={leagueData.strTrophy}
-                      alt="trophy"
+                      src={teamData.strEquipment}
+                      alt="equipment"
                       fill
-                      className="object-contain p-6"
+                      className="object-contain p-4"
                       unoptimized
                     />
                   </div>
@@ -555,7 +562,7 @@ export default function LeaguePage() {
                     href={links.website}
                     icon={<Globe className="h-5 w-5 text-muted-foreground" />}
                     title="Official website"
-                    subtitle={leagueData.strWebsite}
+                    subtitle={teamData.strWebsite || undefined}
                   />
                 ) : null}
 
@@ -573,9 +580,7 @@ export default function LeaguePage() {
                       href={links.twitter}
                       icon={<Twitter className="h-5 w-5 text-muted-foreground" />}
                       title="Twitter / X"
-                      subtitle={
-                        links.twitterHandle ? `@${links.twitterHandle}` : "News & highlights"
-                      }
+                      subtitle={links.twitterHandle ? `@${links.twitterHandle}` : "News & highlights"}
                     />
                   ) : null}
                   {links?.instagram ? (
@@ -614,6 +619,7 @@ export default function LeaguePage() {
                     </div>
                   ) : null}
                 </div>
+
               </CardContent>
             </Card>
           </div>

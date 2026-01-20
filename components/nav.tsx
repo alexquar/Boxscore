@@ -107,7 +107,7 @@ export default function Nav() {
                               ([slug, team]) => (
                                 <li key={slug}>
                                   <Link
-                                    href={`/teams/${slug}`}
+                                    href={`/team/?team=${team}`}
                                     className="block rounded px-2 py-1 text-sm transition hover:text-foreground hover:bg-muted hover:font-medium"
                                   >
                                     {team}
