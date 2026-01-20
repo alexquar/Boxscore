@@ -29,6 +29,11 @@ import {
   Sparkles,
 } from "lucide-react"
 
+import { NBATeam } from "@/util/nbaTeams"
+import { NFLTeam } from "@/util/nflTeams"
+import { MLBTeam } from "@/util/mlbTeams"
+import { NHLTeam } from "@/util/nhlTeams"
+
 interface LeagueData {
   idLeague: string
   strSport: string
@@ -64,7 +69,6 @@ function normalizeUrl(raw?: string) {
   const v = raw.trim()
   if (!v) return null
   if (v.startsWith("http://") || v.startsWith("https://")) return v
-  // Some APIs return "www.foo.com/..." or "facebook.com/..."
   return `https://${v.replace(/^\/\//, "")}`
 }
 
@@ -72,6 +76,35 @@ function safeYear(dateStr?: string) {
   if (!dateStr) return null
   const d = new Date(dateStr)
   return Number.isFinite(d.getTime()) ? d.getFullYear() : null
+}
+
+/**
+ * Converts "Toronto Maple Leafs" -> "Toronto_Maple_Leafs"
+ * Keeps letters/numbers, collapses spaces/dashes to underscores, strips other punctuation.
+ */
+function toTeamQuerySlug(name: string) {
+  return name
+    .trim()
+    .replace(/&/g, "and")
+    .replace(/[’'"]/g, "")
+    .replace(/[^a-zA-Z0-9\s-]/g, "") // remove punctuation except spaces/hyphens
+    .replace(/[\s-]+/g, "_") // spaces/hyphens => underscore
+}
+
+function getTeamsForLeague(league?: string | null): string[] {
+  const key = (league || "").toLowerCase()
+  switch (key) {
+    case "nba":
+      return Object.values(NBATeam)
+    case "nfl":
+      return Object.values(NFLTeam)
+    case "mlb":
+      return Object.values(MLBTeam)
+    case "nhl":
+      return Object.values(NHLTeam)
+    default:
+      return []
+  }
 }
 
 function StatCard({
@@ -112,12 +145,7 @@ function SocialLink({
   subtitle?: string
 }) {
   return (
-    <Link
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group"
-    >
+    <Link href={href} target="_blank" rel="noopener noreferrer" className="group">
       <Card className="border-border/60 transition hover:-translate-y-0.5 hover:border-border hover:shadow-md">
         <CardContent className="flex items-center gap-3 p-4">
           <div className="grid h-10 w-10 place-items-center rounded-xl border bg-background/60">
@@ -129,9 +157,7 @@ function SocialLink({
               <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 transition group-hover:opacity-100" />
             </div>
             {subtitle ? (
-              <div className="truncate text-xs text-muted-foreground">
-                {subtitle}
-              </div>
+              <div className="truncate text-xs text-muted-foreground">{subtitle}</div>
             ) : null}
           </div>
         </CardContent>
@@ -143,13 +169,7 @@ function SocialLink({
 function GalleryImage({ src, alt }: { src: string; alt: string }) {
   return (
     <div className="relative aspect-[16/9] overflow-hidden rounded-xl border bg-muted">
-      <Image
-        src={src}
-        alt={alt}
-        fill
-        className="object-cover"
-        unoptimized
-      />
+      <Image src={src} alt={alt} fill className="object-cover" unoptimized />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
     </div>
   )
@@ -238,6 +258,12 @@ export default function LeaguePage() {
       .slice(0, 5)
   }, [leagueData])
 
+  const teams = useMemo(() => {
+    const list = getTeamsForLeague(league)
+    // Nice UX: keep stable alphabetical (enums usually already are, but just in case)
+    return [...list].sort((a, b) => a.localeCompare(b))
+  }, [league])
+
   if (loading) {
     return (
       <main className="min-h-screen">
@@ -304,13 +330,7 @@ export default function LeaguePage() {
         {heroImage ? (
           <>
             <div className="absolute inset-0">
-              <Image
-                src={heroImage}
-                alt="League hero"
-                fill
-                className="object-cover"
-                unoptimized
-              />
+              <Image src={heroImage} alt="League hero" fill className="object-cover" unoptimized />
               <div className="absolute inset-0 bg-background/70 backdrop-blur-2xl" />
               <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background" />
             </div>
@@ -323,7 +343,7 @@ export default function LeaguePage() {
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="flex items-start gap-4">
               <div className="relative h-16 w-16 overflow-hidden rounded-2xl border bg-background/60 sm:h-20 sm:w-20">
-                {(leagueData.strLogo || leagueData.strBadge) ? (
+                {leagueData.strLogo || leagueData.strBadge ? (
                   <Image
                     src={leagueData.strLogo || leagueData.strBadge}
                     alt="League logo"
@@ -396,7 +416,7 @@ export default function LeaguePage() {
             <StatCard
               icon={<Shield className="h-4 w-4 text-muted-foreground" />}
               label="Division"
-              value={parseInt(leagueData.intDivision)+1 || "—"}
+              value={leagueData.intDivision || "—"}
             />
             <StatCard
               icon={<Calendar className="h-4 w-4 text-muted-foreground" />}
@@ -446,9 +466,7 @@ export default function LeaguePage() {
                             <p key={idx}>{p}</p>
                           ))}
                         {!leagueData.strDescriptionEN ? (
-                          <p className="text-muted-foreground">
-                            No description available.
-                          </p>
+                          <p className="text-muted-foreground">No description available.</p>
                         ) : null}
                       </div>
                     </ScrollArea>
@@ -466,6 +484,49 @@ export default function LeaguePage() {
                     )}
                   </TabsContent>
                 </Tabs>
+              </CardContent>
+            </Card>
+
+            {/* TEAMS SECTION */}
+            <Card className="border-border/60">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-muted-foreground" />
+                  Teams
+                  <Badge variant="secondary" className="ml-1">
+                    {teams.length}
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {teams.length ? (
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {teams.map((team) => {
+                      const slug = toTeamQuerySlug(team)
+                      return (
+                        <Link
+                          key={team}
+                          href={`/teams/?team=${encodeURIComponent(slug)}`}
+                          className="group"
+                        >
+                          <div className="flex items-center justify-between rounded-xl border bg-card/50 p-3 transition hover:-translate-y-0.5 hover:border-border hover:shadow-sm">
+                            <div className="min-w-0">
+                              <div className="truncate text-sm font-semibold">{team}</div>
+                              <div className="truncate text-xs text-muted-foreground">
+                                View team page
+                              </div>
+                            </div>
+                            <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 transition group-hover:opacity-100" />
+                          </div>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="rounded-xl border bg-muted/40 p-4 text-sm text-muted-foreground">
+                    No teams available for this league.
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -541,7 +602,9 @@ export default function LeaguePage() {
                       href={links.twitter}
                       icon={<Twitter className="h-5 w-5 text-muted-foreground" />}
                       title="Twitter / X"
-                      subtitle={links.twitterHandle ? `@${links.twitterHandle}` : "News & highlights"}
+                      subtitle={
+                        links.twitterHandle ? `@${links.twitterHandle}` : "News & highlights"
+                      }
                     />
                   ) : null}
                   {links?.instagram ? (
@@ -581,10 +644,29 @@ export default function LeaguePage() {
                   ) : null}
                 </div>
 
+                <Separator className="my-2" />
+
+                <div className="text-xs text-muted-foreground">
+                  Tip: this page uses shadcn tokens, so it automatically matches your theme.
+                </div>
               </CardContent>
             </Card>
           </div>
         </div>
+
+        <Separator className="my-10" />
+
+        <footer className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-foreground">{leagueData.strLeague}</span>
+            <span>·</span>
+            <span>{leagueData.strSport}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>ID</span>
+            <code className="rounded bg-muted px-2 py-1">{leagueData.idLeague}</code>
+          </div>
+        </footer>
       </div>
     </main>
   )
