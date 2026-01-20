@@ -78,7 +78,7 @@ export default function SearchPage() {
             </CardHeader>
             <CardContent className="space-y-6 text-sm">
               <div className="space-y-2">
-                <p className="font-medium">Sport &amp; league</p>
+                <p className="font-medium">League</p>
                 <p className="text-xs text-muted-foreground">
                   Narrow by sport and competition (e.g. NHL, NBA, Champions League).
                 </p>
@@ -93,7 +93,7 @@ export default function SearchPage() {
               </div>
 
               <div className="space-y-2">
-                <p className="font-medium">Season &amp; date</p>
+                <p className="font-medium">Date range </p>
                 <p className="text-xs text-muted-foreground">
                   Filter by season, year, or specific date ranges.
                 </p>
@@ -111,7 +111,7 @@ export default function SearchPage() {
               </div>
 
               <div className="space-y-2">
-                <p className="font-medium">Teams &amp; players</p>
+                <p className="font-medium">Teams 1</p>
                 <p className="text-xs text-muted-foreground">
                   Limit results to specific teams, rivalries, or star players.
                 </p>
@@ -126,7 +126,7 @@ export default function SearchPage() {
               </div>
 
               <div className="space-y-2">
-                <p className="font-medium">Result type</p>
+                <p className="font-medium">Team 2</p>
                 <p className="text-xs text-muted-foreground">
                   Decide whether you&apos;re browsing full games, series, playoffs,
                   or user logs.
@@ -145,7 +145,7 @@ export default function SearchPage() {
               </div>
 
               <div className="space-y-2">
-                <p className="font-medium">Atmosphere &amp; rating</p>
+                <p className="font-medium">Venue</p>
                 <p className="text-xs text-muted-foreground">
                   Filter by your own ratings or vibe tags once they exist.
                 </p>

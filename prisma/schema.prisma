@@ -56,6 +56,10 @@ model Log{
   deservedWin Int?
   finalScore String?
   standoutPlayers String[]
+  date_of_event DateTime?
+  team1 String?
+  team2 String?
+  league String?
   likes Int     @default(0)
   @@index([userId], name: "logs_user_id_idx")
   @@map("logs")
